@@ -146,7 +146,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ## 5. Implementation Roadmap
 
 - [x] **Phase 1: Foundation** — Repository, solution, 4 Clean Architecture projects, 3 test suites, React Vite frontend, Docker Compose, build verification.
-- [ ] **Phase 2: Domain and Persistence** — Core entities (`User`, `VaultSettings`, `VaultEntry`, `Folder`), EF Core DbContext, PostgreSQL migrations, repository contracts.
+- [x] **Phase 2: Domain and Persistence** — Core entities (`User`, `VaultSettings`, `VaultEntry`, `Folder`, `AuthSession`), EF Core DbContext, PostgreSQL migrations, repository contracts, domain unit tests.
 - [ ] **Phase 3: Authentication** — Register, login, cookie sessions, logout, authorization, rate limiting.
 - [ ] **Phase 4: Cryptography** — Client-side Argon2id KEK derivation, VEK wrapping, AES-256-GCM encryption/decryption, cryptographic roundtrip tests.
 - [ ] **Phase 5: Vertical Slice** — End-to-end authenticate -> unlock -> encrypt entry -> save -> lock -> unlock -> retrieve -> decrypt.
