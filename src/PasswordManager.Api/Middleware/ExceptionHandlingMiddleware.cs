@@ -96,6 +96,16 @@ public class ExceptionHandlingMiddleware
                 };
                 break;
 
+            case NotFoundException notFoundEx:
+                response.StatusCode = (int)HttpStatusCode.NotFound;
+                problemDetails = new ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.NotFound,
+                    Title = "Not Found",
+                    Detail = notFoundEx.Message
+                };
+                break;
+
             case UnauthorizedAccessException unauthorizedEx:
                 response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 problemDetails = new ProblemDetails

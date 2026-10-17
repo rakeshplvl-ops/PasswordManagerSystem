@@ -16,14 +16,24 @@ public class VaultEntryRepository : IVaultEntryRepository
     public async Task<VaultEntry?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
         return await _context.VaultEntries
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<VaultEntry>> GetByUserIdAsync(Guid userId, Guid? folderId = null, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<VaultEntry>> GetByUserIdAsync(
+        Guid userId,
+        Guid? folderId = null,
+        bool includeDeleted = false,
+        CancellationToken cancellationToken = default)
     {
-        var query = _context.VaultEntries
-            .AsNoTracking()
-            .Where(e => e.UserId == userId);
+        var query = _context.VaultEntries.AsNoTracking();
+
+        if (includeDeleted)
+        {
+            query = query.IgnoreQueryFilters();
+        }
+
+        query = query.Where(e => e.UserId == userId);
 
         if (folderId.HasValue)
         {
@@ -49,5 +59,10 @@ public class VaultEntryRepository : IVaultEntryRepository
     {
         entry.SoftDelete();
         _context.VaultEntries.Update(entry);
+    }
+
+    public void HardDelete(VaultEntry entry)
+    {
+        _context.VaultEntries.Remove(entry);
     }
 }
