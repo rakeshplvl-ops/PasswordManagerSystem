@@ -65,7 +65,7 @@ public class AuthService : IAuthService
         if (request.VaultSettings != null)
         {
             var vs = request.VaultSettings;
-            var settings = VaultSettings.Create(
+            var settings = Domain.Entities.VaultSettings.Create(
                 user.Id,
                 vs.EncryptedVek,
                 vs.VekNonce,
