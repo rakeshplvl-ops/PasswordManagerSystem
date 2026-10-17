@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PasswordManager.Application.Common.Interfaces;
 using PasswordManager.Infrastructure.Persistence;
 using PasswordManager.Infrastructure.Persistence.Repositories;
+using PasswordManager.Infrastructure.Security;
 using PasswordManager.Infrastructure.Services;
 
 namespace PasswordManager.Infrastructure;
@@ -12,12 +13,23 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found in configuration.");
+        var databaseProvider = configuration["DatabaseProvider"];
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(connectionString, b =>
-                b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
+        if (string.Equals(databaseProvider, "InMemory", StringComparison.OrdinalIgnoreCase))
+        {
+            var dbName = configuration["DatabaseName"] ?? "PasswordManagerInMemoryDb";
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseInMemoryDatabase(dbName));
+        }
+        else
+        {
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found in configuration.");
+
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(connectionString, b =>
+                    b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
+        }
 
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<AppDbContext>());
         services.AddScoped<IUserRepository, UserRepository>();
@@ -26,6 +38,8 @@ public static class DependencyInjection
         services.AddScoped<IFolderRepository, FolderRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddSingleton<IPasswordHasher, Argon2idPasswordHasher>();
+        services.AddSingleton<ISessionTokenService, SessionTokenService>();
 
         return services;
     }

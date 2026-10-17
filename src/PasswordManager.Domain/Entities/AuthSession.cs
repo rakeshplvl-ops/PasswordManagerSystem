@@ -26,8 +26,11 @@ public class AuthSession : BaseEntity
         string tokenHash,
         DateTime expiresAt,
         string? ipAddress = null,
-        string? userAgent = null)
+        string? userAgent = null,
+        DateTime? createdAt = null)
     {
+        var now = createdAt ?? DateTime.UtcNow;
+
         if (userId == Guid.Empty)
         {
             throw new DomainException("UserId cannot be empty.");
@@ -38,12 +41,11 @@ public class AuthSession : BaseEntity
             throw new DomainException("Session token hash cannot be empty.");
         }
 
-        if (expiresAt <= DateTime.UtcNow)
+        if (expiresAt <= now)
         {
             throw new DomainException("Session expiry must be in the future.");
         }
 
-        var now = DateTime.UtcNow;
         return new AuthSession
         {
             Id = Guid.NewGuid(),
