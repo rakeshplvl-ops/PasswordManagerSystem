@@ -3,15 +3,15 @@ services:
     image: postgres:17-alpine
     container_name: passwordmanager-db
     environment:
-      POSTGRES_DB: passwordmanager_db
-      POSTGRES_USER: pm_user
-      POSTGRES_PASSWORD: pm_password_dev_secret_change_in_prod
+      POSTGRES_DB: ${POSTGRES_DB:-passwordmanager_db}
+      POSTGRES_USER: ${POSTGRES_USER:-pm_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pm_password_dev_secret_change_in_prod}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pm_user -d passwordmanager_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pm_user} -d ${POSTGRES_DB:-passwordmanager_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -28,11 +28,11 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=passwordmanager_db;Username=pm_user;Password=pm_password_dev_secret_change_in_prod
-      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-passwordmanager_db};Username=${POSTGRES_USER:-pm_user};Password=${POSTGRES_PASSWORD:-pm_password_dev_secret_change_in_prod}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ASPNETCORE_URLS: http://+:8080
     ports:
-      - "8080:8080"
+      - "${API_PORT:-8080}:8080"
     restart: unless-stopped
     networks:
       - pm-network
@@ -45,7 +45,7 @@ services:
     depends_on:
       - api
     ports:
-      - "3000:80"
+      - "${WEB_PORT:-3000}:80"
     restart: unless-stopped
     networks:
       - pm-network

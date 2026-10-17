@@ -2,6 +2,11 @@ import type { VaultSettings } from '../crypto/types';
 
 const BASE_URL = '/api/v1/vault/settings';
 
+const DEFAULT_HEADERS: Record<string, string> = {
+  'Content-Type': 'application/json',
+  'X-Requested-With': 'XMLHttpRequest',
+};
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let errorDetail = `Request failed with status ${res.status}`;
@@ -20,7 +25,7 @@ export const settingsApi = {
   async getSettings(): Promise<VaultSettings | null> {
     const res = await fetch(BASE_URL, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       credentials: 'include',
     });
 
@@ -34,7 +39,7 @@ export const settingsApi = {
   async updateSettings(settings: Omit<VaultSettings, 'userId' | 'updatedAt'>): Promise<VaultSettings> {
     const res = await fetch(BASE_URL, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       body: JSON.stringify(settings),
       credentials: 'include',
     });

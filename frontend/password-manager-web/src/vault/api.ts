@@ -7,6 +7,11 @@ import type {
 
 const BASE_URL = '/api/v1/vault';
 
+const DEFAULT_HEADERS: Record<string, string> = {
+  'Content-Type': 'application/json',
+  'X-Requested-With': 'XMLHttpRequest',
+};
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let errorDetail = `Request failed with status ${res.status}`;
@@ -30,7 +35,7 @@ export const vaultApi = {
     const url = `${BASE_URL}/entries${params.toString() ? `?${params.toString()}` : ''}`;
     const res = await fetch(url, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       credentials: 'include',
     });
     return handleResponse<VaultEntryResponse[]>(res);
@@ -39,7 +44,7 @@ export const vaultApi = {
   async getEntryById(id: string): Promise<VaultEntryResponse> {
     const res = await fetch(`${BASE_URL}/entries/${id}`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       credentials: 'include',
     });
     return handleResponse<VaultEntryResponse>(res);
@@ -48,7 +53,7 @@ export const vaultApi = {
   async createEntry(payload: CreateVaultEntryPayload): Promise<VaultEntryResponse> {
     const res = await fetch(`${BASE_URL}/entries`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       body: JSON.stringify(payload),
       credentials: 'include',
     });
@@ -58,7 +63,7 @@ export const vaultApi = {
   async updateEntry(id: string, payload: UpdateVaultEntryPayload): Promise<VaultEntryResponse> {
     const res = await fetch(`${BASE_URL}/entries/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       body: JSON.stringify(payload),
       credentials: 'include',
     });
@@ -68,7 +73,7 @@ export const vaultApi = {
   async moveEntry(id: string, folderId: string | null): Promise<VaultEntryResponse> {
     const res = await fetch(`${BASE_URL}/entries/${id}/move`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       body: JSON.stringify({ folderId }),
       credentials: 'include',
     });
@@ -78,6 +83,7 @@ export const vaultApi = {
   async softDeleteEntry(id: string): Promise<void> {
     const res = await fetch(`${BASE_URL}/entries/${id}`, {
       method: 'DELETE',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
       credentials: 'include',
     });
     if (!res.ok) {
@@ -88,6 +94,7 @@ export const vaultApi = {
   async restoreEntry(id: string): Promise<void> {
     const res = await fetch(`${BASE_URL}/entries/${id}/restore`, {
       method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
       credentials: 'include',
     });
     if (!res.ok) {
@@ -98,6 +105,7 @@ export const vaultApi = {
   async purgeEntry(id: string): Promise<void> {
     const res = await fetch(`${BASE_URL}/entries/${id}/purge`, {
       method: 'DELETE',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
       credentials: 'include',
     });
     if (!res.ok) {
@@ -108,7 +116,7 @@ export const vaultApi = {
   async getFolders(): Promise<FolderResponse[]> {
     const res = await fetch(`${BASE_URL}/folders`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       credentials: 'include',
     });
     return handleResponse<FolderResponse[]>(res);
@@ -117,7 +125,7 @@ export const vaultApi = {
   async getFolderById(id: string): Promise<FolderResponse> {
     const res = await fetch(`${BASE_URL}/folders/${id}`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       credentials: 'include',
     });
     return handleResponse<FolderResponse>(res);
@@ -126,7 +134,7 @@ export const vaultApi = {
   async createFolder(payload: { encryptedName: string; nonce: string }): Promise<FolderResponse> {
     const res = await fetch(`${BASE_URL}/folders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       body: JSON.stringify(payload),
       credentials: 'include',
     });
@@ -139,7 +147,7 @@ export const vaultApi = {
   ): Promise<FolderResponse> {
     const res = await fetch(`${BASE_URL}/folders/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       body: JSON.stringify(payload),
       credentials: 'include',
     });
@@ -149,6 +157,7 @@ export const vaultApi = {
   async deleteFolder(id: string): Promise<void> {
     const res = await fetch(`${BASE_URL}/folders/${id}`, {
       method: 'DELETE',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
       credentials: 'include',
     });
     if (!res.ok) {

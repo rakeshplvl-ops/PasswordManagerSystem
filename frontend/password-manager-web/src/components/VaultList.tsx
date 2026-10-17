@@ -13,6 +13,7 @@ import {
   Globe,
   Clock,
   Sparkles,
+  Star,
 } from 'lucide-react';
 import type { DecryptedFolder, DecryptedVaultEntry } from '../vault/types';
 import { copyToClipboard } from './useToast';
@@ -26,6 +27,7 @@ interface VaultListProps {
   onRestore: (id: string) => void;
   onPurge: (id: string) => void;
   onOpenCreate: () => void;
+  onToggleFavorite?: (entry: DecryptedVaultEntry) => void;
 }
 
 export function VaultList({
@@ -37,6 +39,7 @@ export function VaultList({
   onRestore,
   onPurge,
   onOpenCreate,
+  onToggleFavorite,
 }: VaultListProps) {
   const [selectedId, setSelectedId] = useState<string | null>(
     entries.length > 0 ? entries[0].id : null
@@ -113,12 +116,17 @@ export function VaultList({
                   </div>
                 </div>
 
-                {folderName && (
-                  <span className="flex items-center gap-1 text-[10px] text-indigo-400 font-medium px-2 py-0.5 rounded-md bg-indigo-950/50 border border-indigo-500/20 shrink-0">
-                    <FolderIcon className="w-2.5 h-2.5" />
-                    <span>{folderName}</span>
-                  </span>
-                )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {entry.data.isFavorite && (
+                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                  )}
+                  {folderName && (
+                    <span className="flex items-center gap-1 text-[10px] text-indigo-400 font-medium px-2 py-0.5 rounded-md bg-indigo-950/50 border border-indigo-500/20 shrink-0">
+                      <FolderIcon className="w-2.5 h-2.5" />
+                      <span>{folderName}</span>
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Quick Copy bar */}
@@ -193,6 +201,21 @@ export function VaultList({
                 </>
               ) : (
                 <>
+                  {onToggleFavorite && (
+                    <button
+                      type="button"
+                      id="toggle-favorite-btn"
+                      onClick={() => onToggleFavorite(selectedEntry)}
+                      className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                        selectedEntry.data.isFavorite
+                          ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+                          : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-amber-300 hover:bg-slate-800'
+                      }`}
+                      title={selectedEntry.data.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      <Star className={`w-3.5 h-3.5 ${selectedEntry.data.isFavorite ? 'fill-amber-400' : ''}`} />
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => onEdit(selectedEntry)}

@@ -21,4 +21,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.UseEnvironment("Testing");
     }
+
+    protected override void ConfigureClient(HttpClient client)
+    {
+        base.ConfigureClient(client);
+        client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
+    }
 }

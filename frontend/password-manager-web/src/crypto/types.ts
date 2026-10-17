@@ -33,6 +33,7 @@ export interface CredentialPayload {
   notes?: string;
   folderId?: string | null;
   customFields?: Record<string, string>;
+  isFavorite?: boolean;
 }
 
 export interface InitialVaultBundle {

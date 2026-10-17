@@ -15,6 +15,11 @@ export interface AuthResponse {
 
 const BASE_URL = '/api/v1/auth';
 
+const DEFAULT_HEADERS: Record<string, string> = {
+  'Content-Type': 'application/json',
+  'X-Requested-With': 'XMLHttpRequest',
+};
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let errorDetail = `Request failed with status ${res.status}`;
@@ -54,7 +59,7 @@ export const authApi = {
 
     const res = await fetch(`${BASE_URL}/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       body: JSON.stringify(payload),
       credentials: 'include',
     });
@@ -65,7 +70,7 @@ export const authApi = {
   async login(email: string, password: string): Promise<AuthResponse> {
     const res = await fetch(`${BASE_URL}/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       body: JSON.stringify({ email, password }),
       credentials: 'include',
     });
@@ -76,6 +81,7 @@ export const authApi = {
   async logout(): Promise<void> {
     const res = await fetch(`${BASE_URL}/logout`, {
       method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
       credentials: 'include',
     });
     if (!res.ok) {
@@ -86,7 +92,7 @@ export const authApi = {
   async getCurrentUser(): Promise<UserResponse | null> {
     const res = await fetch(`${BASE_URL}/me`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: DEFAULT_HEADERS,
       credentials: 'include',
     });
 

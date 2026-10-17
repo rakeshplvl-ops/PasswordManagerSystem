@@ -12,6 +12,7 @@ import {
   Folder as FolderIcon,
   Globe,
   FileText,
+  Star,
 } from 'lucide-react';
 import { useVaultStore } from '../vault/vaultStore';
 import { VaultService } from '../vault/vaultService';
@@ -45,6 +46,7 @@ export function VaultItemModal({
   const [folderId, setFolderId] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [customFields, setCustomFields] = useState<{ key: string; value: string }[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
@@ -62,6 +64,7 @@ export function VaultItemModal({
       setWebsite(item.data.website || '');
       setFolderId(item.folderId || null);
       setNotes(item.data.notes || '');
+      setIsFavorite(!!item.data.isFavorite);
 
       const fields = Object.entries(item.data.customFields || {}).map(([key, value]) => ({
         key,
@@ -75,6 +78,7 @@ export function VaultItemModal({
       setWebsite('');
       setFolderId(defaultFolderId || null);
       setNotes('');
+      setIsFavorite(false);
       setCustomFields([]);
     }
     setError(null);
@@ -126,6 +130,7 @@ export function VaultItemModal({
       notes: notes.trim() || undefined,
       folderId: folderId || null,
       customFields: Object.keys(customFieldsMap).length > 0 ? customFieldsMap : undefined,
+      isFavorite: isFavorite || undefined,
     };
 
     try {
@@ -182,7 +187,21 @@ export function VaultItemModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {/* Title */}
               <div className="flex flex-col gap-1.5 md:col-span-2">
-                <label className="text-xs font-medium text-slate-300">Title</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-300">Title</label>
+                  <button
+                    type="button"
+                    onClick={() => setIsFavorite(!isFavorite)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
+                      isFavorite
+                        ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
+                    <span>{isFavorite ? 'Favorited' : 'Favorite'}</span>
+                  </button>
+                </div>
                 <input
                   id="item-title-input"
                   type="text"

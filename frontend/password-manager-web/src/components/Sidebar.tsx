@@ -2,6 +2,7 @@ import {
   ShieldCheck,
   KeyRound,
   FileText,
+  Star,
   Trash2,
   Folder as FolderIcon,
   Lock,
@@ -14,7 +15,7 @@ import type { DecryptedFolder, DecryptedVaultEntry } from '../vault/types';
 import { useAuth } from '../auth/AuthContext';
 import { useVaultStore } from '../vault/vaultStore';
 
-export type FilterCategory = 'all' | 'logins' | 'notes' | 'trash';
+export type FilterCategory = 'all' | 'favorites' | 'logins' | 'notes' | 'trash';
 
 interface SidebarProps {
   selectedCategory: FilterCategory;
@@ -89,6 +90,28 @@ export function Sidebar({
             </div>
             <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-900 text-slate-400 font-mono">
               {activeEntries.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            id="nav-favorites"
+            onClick={() => {
+              onSelectFolder(null);
+              onSelectCategory('favorites');
+            }}
+            className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+              selectedCategory === 'favorites' && selectedFolderId === null
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <Star className="w-4 h-4 text-amber-400" />
+              <span>Favorites</span>
+            </div>
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-900 text-slate-400 font-mono">
+              {activeEntries.filter((e) => e.data.isFavorite).length}
             </span>
           </button>
 

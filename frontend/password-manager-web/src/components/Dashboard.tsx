@@ -60,6 +60,27 @@ export function Dashboard() {
     onError: (err: Error) => showToast(err.message, 'error'),
   });
 
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async (entry: DecryptedVaultEntry) => {
+      if (!vek) throw new Error('Vault is locked');
+      const updatedPayload = {
+        ...entry.data,
+        isFavorite: !entry.data.isFavorite,
+      };
+      const prepared = await VaultService.encryptAndPrepareUpdate(
+        updatedPayload,
+        vek,
+        entry.folderId,
+        entry.schemaVersion
+      );
+      return await vaultApi.updateEntry(entry.id, prepared);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vault-entries'] });
+    },
+    onError: (err: Error) => showToast(err.message, 'error'),
+  });
+
   const restoreMutation = useMutation({
     mutationFn: (id: string) => vaultApi.restoreEntry(id),
     onSuccess: () => {
@@ -104,7 +125,9 @@ export function Dashboard() {
       }
 
       // 3. Category filter
-      if (selectedCategory === 'notes') {
+      if (selectedCategory === 'favorites') {
+        if (!entry.data.isFavorite) return false;
+      } else if (selectedCategory === 'notes') {
         if (entry.data.password || !entry.data.notes) return false;
       }
 
@@ -134,6 +157,8 @@ export function Dashboard() {
     switch (selectedCategory) {
       case 'trash':
         return 'Trash';
+      case 'favorites':
+        return 'Favorites';
       case 'notes':
         return 'Secure Notes';
       case 'logins':
@@ -198,6 +223,7 @@ export function Dashboard() {
               onSoftDelete={(id) => softDeleteMutation.mutate(id)}
               onRestore={(id) => restoreMutation.mutate(id)}
               onPurge={(id) => purgeMutation.mutate(id)}
+              onToggleFavorite={(item) => toggleFavoriteMutation.mutate(item)}
               onOpenCreate={() => {
                 setEditingItem(null);
                 setIsItemModalOpen(true);

@@ -2,6 +2,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using PasswordManager.Api.Authentication;
+using PasswordManager.Api.Health;
 using PasswordManager.Api.Middleware;
 using PasswordManager.Application;
 using PasswordManager.Infrastructure;
@@ -22,6 +23,10 @@ builder.Services.AddOpenApi();
 // Register Clean Architecture layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Register Health Checks
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database");
 
 // Configure Session Authentication & Authorization
 builder.Services.AddAuthentication(options =>
@@ -86,6 +91,9 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// Anti-CSRF Verification Middleware
+app.UseMiddleware<AntiCsrfMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -100,6 +108,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/api/health");
 
 // Apply database migrations on startup when running against real database (PostgreSQL)
 if (!string.Equals(app.Configuration["DatabaseProvider"], "InMemory", StringComparison.OrdinalIgnoreCase))
