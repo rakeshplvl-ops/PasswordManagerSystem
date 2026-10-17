@@ -1,0 +1,43 @@
+# ==========================================
+# Stage 1: Build & Publish (.NET 10 SDK)
+# ==========================================
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+WORKDIR /src
+
+# Copy project files first for efficient Docker layer caching
+COPY PasswordManager.sln ./
+COPY src/PasswordManager.Domain/PasswordManager.Domain.csproj src/PasswordManager.Domain/
+COPY src/PasswordManager.Application/PasswordManager.Application.csproj src/PasswordManager.Application/
+COPY src/PasswordManager.Infrastructure/PasswordManager.Infrastructure.csproj src/PasswordManager.Infrastructure/
+COPY src/PasswordManager.Api/PasswordManager.Api.csproj src/PasswordManager.Api/
+COPY tests/PasswordManager.Domain.Tests/PasswordManager.Domain.Tests.csproj tests/PasswordManager.Domain.Tests/
+COPY tests/PasswordManager.Application.Tests/PasswordManager.Application.Tests.csproj tests/PasswordManager.Application.Tests/
+COPY tests/PasswordManager.Api.IntegrationTests/PasswordManager.Api.IntegrationTests.csproj tests/PasswordManager.Api.IntegrationTests/
+
+# Restore dependencies
+RUN dotnet restore src/PasswordManager.Api/PasswordManager.Api.csproj
+
+# Copy the rest of the source code
+COPY src/ src/
+
+# Build and publish in Release mode
+RUN dotnet publish src/PasswordManager.Api/PasswordManager.Api.csproj \
+    -c Release \
+    -o /app/publish \
+    --no-restore
+
+# ==========================================
+# Stage 2: Production Runtime (.NET 10 ASP.NET Alpine)
+# ==========================================
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
+WORKDIR /app
+
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+# Security: Run as unprivileged user
+USER $APP_UID
+
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "PasswordManager.Api.dll"]

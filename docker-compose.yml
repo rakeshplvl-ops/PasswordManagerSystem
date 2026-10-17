@@ -16,7 +16,44 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks:
+      - pm-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: passwordmanager-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=passwordmanager_db;Username=pm_user;Password=pm_password_dev_secret_change_in_prod
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - pm-network
+
+  web:
+    build:
+      context: ./frontend/password-manager-web
+      dockerfile: Dockerfile
+    container_name: passwordmanager-web
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    networks:
+      - pm-network
 
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  pm-network:
+    driver: bridge
